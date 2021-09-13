@@ -22,6 +22,8 @@
   "scripts": {
     "build": "yarn webpack",
     "test": "yarn build && k6 run dist/test.js",
-    "test:cryptocompare": "yarn build && k6 run dist/testCryptocompare.js"
+    "test:docker": "yarn build && docker run --rm -v $(pwd)/dist:/load -i loadimpact/k6 run /load/test.js",
+    "test:cryptocompare": "yarn build && k6 run dist/testCryptocompare.js",
+    "test:cryptocompare:docker": "yarn build && docker run --rm -v $(pwd)/dist:/load -i loadimpact/k6 run /load/testCryptocompare.js"
   }
 }

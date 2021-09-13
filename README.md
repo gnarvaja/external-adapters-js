@@ -175,7 +175,7 @@ The first step will be to load up all of the environment variables that are need
 
 Starting from the root of the repository:
 
-1. Ensure that the project is setup and that the docker-compose file has been generated
+1. Ensure that the project is setup and that the docker-compose file has been generated (note: requires at least node 14.16.0)
 
    ```json
    yarn && yarn setup && yarn generate:docker-compose
