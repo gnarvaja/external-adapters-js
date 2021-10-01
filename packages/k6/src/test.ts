@@ -40,14 +40,30 @@ function getLoadTestGroupsUrls(): LoadTestGroupUrls {
   } else {
     const loadTestGroup = Array(GROUP_COUNT)
       .fill(null)
-      .map((_) => `https://adapters.main.stage.cldev.sh/`)
+      .map((_) => {
+        if (__ENV.QA_RELEASE_TAG) {
+          return `https://adapters.qa.stage.cldev.sh/`
+        } else {
+          return `https://adapters.main.stage.cldev.sh/`
+        }
+      })
 
     const adaptersToMap = ADAPTERS.filter((a) => currIteration % a.secondsPerCall === 0).map(
       (a) => a.name,
     )
     const adaptersPerLoadTestGroup = loadTestGroup.map(
       (u, i) =>
-        [i, Object.fromEntries(adaptersToMap.map((a) => [a, `${u}${a}`] as const))] as const,
+        [
+          i,
+          Object.fromEntries(
+            adaptersToMap.map((a) => {
+              if (__ENV.QA_RELEASE_TAG) {
+                return [a, `${u}qa-ea-${a}-${__ENV.QA_RELEASE_TAG}`] as const
+              }
+              return [a, `${u}${a}`] as const
+            }),
+          ),
+        ] as const,
     )
 
     return Object.fromEntries(adaptersPerLoadTestGroup)
@@ -75,13 +91,14 @@ function buildRequests() {
               body,
               params,
             }
-          } else
+          } else {
             batchRequests[`Group-${loadTestGroup}-${adapterName}-${payload.name}`] = {
               method: payload.method,
               url,
               body: payload.data,
               params,
             }
+          }
         }
       }
 
@@ -101,7 +118,7 @@ function buildRequests() {
 
 const batchRequests = buildRequests()
 
-export default () => {
+export default (): void => {
   currIteration++
   const responses = http.batch(batchRequests)
   for (const [name, response] of Object.entries(responses)) {
