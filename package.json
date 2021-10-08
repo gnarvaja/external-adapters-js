@@ -26,8 +26,7 @@
     "generate:image-name": "ts-node-transpile-only ./packages/scripts/src/generate-image-name",
     "postinstall": "husky install",
     "cm": "cz",
-    "qa:adapter:start": "./ephemeral/startAdapter.sh",
-    "qa:adapter:stop": "./ephemeral/stopAdapter.sh"
+    "qa:adapter": "ts-node-transpile-only ./packages/scripts/src/ephemeral-environments"
   },
   "dependencies": {
     "@babel/core": "7.15.0",

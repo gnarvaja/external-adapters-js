@@ -1,4 +1,8 @@
 #!/bin/bash
+set -x
+
+DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd ${DIR}
 
 ###### Usage ######
 #
@@ -13,19 +17,23 @@
 #
 ###### ----- ######
 
+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
+
 ## The name of the adapter you want to deploy
 ADAPTER=${ADAPTER:=}
 ## A unique release tag, in ci this will be the pr number, keeps us from having collisions
 RELEASE_TAG=${RELEASE_TAG:=}
 ## Path to the helm chart directory
-HELM_CHART_DIR=${HELM_CHART_DIR:=./ephemeral/cl-adapter}
+HELM_CHART_DIR=${HELM_CHART_DIR:=chainlink/cl-adapter}
+## Path to helm values you would like to use as an override
+HELM_VALUES=${HELM_VALUES:=}
 ## The repository where your built image is
 IMAGE_REPOSITORY=${IMAGE_REPOSITORY:=public.ecr.aws/chainlink/adapters/}
 ## The image tag, can also be an image sha
 IMAGE_TAG=${IMAGE_TAG:=develop-latest}
 
 ## The release name to be used in helm
-NAME=qa-ea-${ADAPTER}-${RELEASE_TAG}
+NAME=${NAME:=qa-ea-${ADAPTER}-${RELEASE_TAG}}
 ## The namespace for the k8s release
 NAMESPACE=ephemeral-adapters
 
@@ -48,11 +56,18 @@ if [ -z "$RELEASE_TAG" ]; then
     exit 1
 fi
 
+if [ "$HELM_VALUES" ]; then
+    HELM_VALUES="-f ${HELM_VALUES}"
+fi
+
+
 # deploy the adapter
+helm repo add chainlink https://smartcontractkit.github.io/charts
 helm upgrade ${NAME} ${HELM_CHART_DIR} \
     --install \
     --namespace ${NAMESPACE} \
     --create-namespace \
+    ${HELM_VALUES} \
     --set image.repository="${IMAGE_REPOSITORY}${ADAPTER}-adapter" \
     --set image.tag=${IMAGE_TAG} \
     --set name=${NAME} \
