@@ -9,7 +9,10 @@ export interface WSConfigPayload {
   config: WSConfig
   // TODO: wsHandler should not be sent as an event
   wsHandler: WSHandler
-  shouldNotRetryConnecting?: boolean
+}
+
+export interface WSConnectFulfilledPayload extends WSConfigPayload {
+  connectionInfo: WSConnectionInfo
 }
 
 export interface WSConfigDetailedPayload extends WSConfigPayload {
@@ -68,7 +71,10 @@ export const connectRequested = createAction(
   'WS/CONNECT_REQUESTED',
   asAction<WSConfigDetailedPayload>(),
 )
-export const connectFulfilled = createAction('WS/CONNECT_FULFILLED', asAction<WSConfigPayload>())
+export const connectFulfilled = createAction(
+  'WS/CONNECT_FULFILLED',
+  asAction<WSConnectFulfilledPayload>(),
+)
 export const connectFailed = createAction('WS/CONNECTION_FAILED', asAction<WSErrorPayload>())
 export const disconnectFulfilled = createAction(
   'WS/DISCONNECT_FULFILLED',
@@ -97,12 +103,23 @@ export interface WSSubscriptionPayload {
   subscriptionMsg: any
   input: AdapterRequest
   context: AdapterContext
+  messageToSave?: any
+  filterMultiplex?: (message: any) => boolean
+  shouldNeverUnsubscribe?: boolean
 }
 
 export interface WSSubscriptionErrorPayload extends WSErrorPayload {
   subscriptionMsg?: any
   input?: AdapterRequest
   error?: unknown
+  wsHandler: WSHandlerOverride
+}
+
+export interface WSSubscriptionErrorHandlerPayload {
+  connectionInfo: WSConnectionInfo
+  subscriptionMsg?: any
+  shouldNotRetrySubscription: boolean
+  shouldNotRetryConnection: boolean
 }
 
 export const subscribeRequested = createAction(
@@ -116,6 +133,10 @@ export const subscribeFulfilled = createAction(
 export const subscriptionError = createAction(
   'WS/SUBSCRIPTION_ERROR',
   asAction<WSSubscriptionErrorPayload>(),
+)
+export const subscriptionErrorHandler = createAction(
+  'WS/SUBSCRIPTION_ERROR_HANDLER',
+  asAction<WSSubscriptionErrorHandlerPayload>(),
 )
 export const unsubscribeRequested = createAction(
   'WS/UNSUBSCRIBE_REQUESTED',

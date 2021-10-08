@@ -197,11 +197,11 @@ declare module '@chainlink/types' {
     // Hook to send a message after connection
     onConnect?: (input: AdapterRequest) => any
     // Hook to send chain of onConnect messages
-    onConnectChain?: ((
-      input?: AdapterRequest,
-      prevWsResponse?: any,
-      connectionParams?: any,
-    ) => void)[]
+    onConnectChain?: {
+      payload: any
+      filter?: (prevMessage: any) => boolean
+      shouldNeverUnsubscribe?: boolean
+    }[]
     // Get the subscription message necessary to subscribe to the feed channel
     subscribe: (input: AdapterRequest) => any | undefined
     // Modify subscription payload before sending to WS
@@ -222,7 +222,12 @@ declare module '@chainlink/types' {
     // Determines if the incoming message is an error
     isError: (message: any) => boolean
     // Based on the incoming message, returns its corresponding subscription message
-    subsFromMessage: (message: any, subscriptionMsg: any, input: AdapterRequest) => any
+    subsFromMessage: (
+      message: any,
+      subscriptionMsg: any,
+      input: AdapterRequest,
+      connectionParams?: any,
+    ) => any
     // Allows for connection info to be set programmatically based on the input request
     // This is useful for data providers that only allow subscriptions based on URL params
     programmaticConnectionInfo?: (input: AdapterRequest) =>
@@ -245,8 +250,16 @@ declare module '@chainlink/types' {
     heartbeatIntervalInMS?: number
     // Filters out messages that are not expected from sending a message constructed by one of the onConnect hooks
     isOnConnectChainMessage?: (message: any) => boolean
+    // Whether or not message is sent to subscribe to a pair/ticker
+    isDataMessage?: (message: unknown) => boolean
+    // Whether or not to reply to a heartbeat message from the server
+    shouldReplyToServerHeartbeat?: (message: unknown) => boolean
+    // The message that will be sent back to the WS server
+    heartbeatReplyMessage?: (message: unknown, id: number, connectionParams: any) => unknown
     // Should try open connection again after error
-    shouldRetryConnection?: (errorMessage: WebsocketErrorMessageSchema) => boolean
+    shouldNotRetryConnection?: (error: unknown) => boolean
+    // Should try resubscribing to a connection again after an error
+    shouldNotRetrySubscription?: (subscription: unknown) => boolean
   }
 
   /* INPUT TYPE VALIDATIONS */
