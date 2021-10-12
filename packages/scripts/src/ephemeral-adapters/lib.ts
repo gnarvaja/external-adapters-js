@@ -1,23 +1,22 @@
 import chalk from 'chalk'
-import * as shell from 'shelljs'
-import { ShellString } from 'shelljs'
+import { Shell, ShellOut } from '../shell/Shell'
 const { red, blue } = chalk
 const { log } = console
 
-const ACTIONS: string[] = ['start', 'stop']
-const HELM_CHART_DIR = 'chainlink/cl-adapter'
-const IMAGE_REPOSITORY = 'public.ecr.aws/chainlink/adapters/'
-const IMAGE_TAG = 'develop-latest'
-const NAMESPACE = 'ephemeral-adapters'
+export const ACTIONS: string[] = ['start', 'stop']
+export const HELM_CHART_DIR = 'chainlink/cl-adapter'
+export const IMAGE_REPOSITORY = 'public.ecr.aws/chainlink/adapters/'
+export const IMAGE_TAG = 'develop-latest'
+export const NAMESPACE = 'ephemeral-adapters'
 
-interface Inputs {
+export interface Inputs {
   action: string
   adapter: string
   release: string
-  imageTag: string
-  imageRepository: string
-  helmChartDir: string
-  helmValuesOverride: string
+  imageTag?: string
+  imageRepository?: string
+  helmChartDir?: string
+  helmValuesOverride?: string
   name: string
 }
 
@@ -34,25 +33,24 @@ IMAGE_REPOSITORY - The docker image reposoitory where the image you want deploye
 
 /**
  * Verifies we have a command installed on this machine
- * @param command The command to check for
+ * @param {string} command The command to check for
  */
-const checkCommandIsInstalled = (command: string): void => {
-  const c: string = shell.exec(`command -v ${command}`).toString()
-  if (!c) throw red.bold(`${command} is not installed`)
+export const checkCommandIsInstalled = (command: string): void => {
+  const c: string = new Shell().exec(`command -v ${command}`)
+  if (!c || c === '') throw red.bold(`${command} is not installed`)
 }
 
 /**
- * We only want to start and stop adapter containers on the qa cluster.
- * This verifies we are on the qa cluster.
+ * We only want to start and stop adapter containers on the sdlc cluster.
+ * This verifies we are on the sdlc cluster.
  */
-const verifyWeAreOnQaStagingCluster = (): void => {
-  const response: ShellString = shell.exec(
-    `kubectl config get-contexts | grep '*' | grep qa-stage-cluster`,
+export const verifyWeAreOnSdlcCluster = (): void => {
+  const response: ShellOut = new Shell().exec(
+    `kubectl config get-contexts | grep '*' | grep main-sdlc-cluster`,
   )
-  log(response)
   if (response.code !== 0)
     throw red.bold(
-      'We only want to spin ephemeral environments up on the qa cluster. Please change your kubectx.',
+      `We only want to spin ephemeral environments up on the sdlc cluster. Please change your kubectx. ${response.toString()}`,
     )
 }
 
@@ -61,19 +59,31 @@ const verifyWeAreOnQaStagingCluster = (): void => {
  * @param {Inputs} config The configuation for this deployment
  * @returns The string to use for the name of the adapter
  */
-const generateName = (config: Inputs): string => {
+export const generateName = (config: Inputs): string => {
   return `qa-ea-${config.adapter}-${config.release}`
+}
+
+/**
+ * Check that the correct tools are installed on this machine and that
+ * we are on the correct k8s environment context.
+ */
+export const checkEnvironment = (): void => {
+  checkCommandIsInstalled('kubectl')
+  checkCommandIsInstalled('helm')
+  checkCommandIsInstalled('grep')
+  verifyWeAreOnSdlcCluster()
 }
 
 /**
  * Checks the args and environment for required inputs and commands.
  * @returns The inputs from the args and env.
  */
-const checkArgsAndEnvironment = (): Inputs => {
+export const checkArgs = (): Inputs => {
   // check the args
   if (process.argv.length < 5) {
     throw red.bold(usageString)
   }
+  console.log(JSON.stringify(process.argv))
   const action: string = process.argv[2]
   if (!ACTIONS.includes(action))
     throw red.bold(`The first argument must be one of: ${ACTIONS.join(', ')}`)
@@ -101,12 +111,6 @@ const checkArgsAndEnvironment = (): Inputs => {
     helmValuesOverride = `-f ${helmValuesOverride}`
   }
 
-  // check if required commands are installed
-  checkCommandIsInstalled('kubectl')
-  checkCommandIsInstalled('helm')
-  checkCommandIsInstalled('grep')
-  verifyWeAreOnQaStagingCluster()
-
   const inputs: Inputs = {
     action,
     adapter,
@@ -128,8 +132,13 @@ const checkArgsAndEnvironment = (): Inputs => {
  * @param {Input} config The configuration of the adapter you wish to deploy
  */
 export const deployAdapter = (config: Inputs): void => {
-  shell.exec('helm repo add chainlink https://smartcontractkit.github.io/charts')
-  shell.exec(
+  const addHelmChart = new Shell().exec(
+    'helm repo add chainlink https://smartcontractkit.github.io/charts',
+  )
+  if (addHelmChart.code !== 0) {
+    throw red.bold(`Failed to add the chainlink helm chart repository: ${addHelmChart.toString()}`)
+  }
+  const deployHelm = new Shell().exec(
     `helm upgrade ${config.name} ${config.helmChartDir} \
       --install \
       --namespace ${NAMESPACE} \
@@ -140,6 +149,9 @@ export const deployAdapter = (config: Inputs): void => {
       --set name=${config.name} \
       --wait`,
   )
+  if (deployHelm.code !== 0) {
+    throw red.bold(`Failed to deploy the external adapter: ${deployHelm.toString()}`)
+  }
 }
 
 /**
@@ -147,16 +159,22 @@ export const deployAdapter = (config: Inputs): void => {
  * @param {Inputs} config The configuration to use to stop an adapter
  */
 export const removeAdapter = (config: Inputs): void => {
-  shell.exec(
+  const remove = new Shell().exec(
     `helm uninstall ${config.name} \
       --namespace ${NAMESPACE} \
       --wait`,
   )
+  if (remove.code !== 0) {
+    throw red.bold(`Failed to remove the external adapter: ${remove}`)
+  }
 }
 
 export async function main(): Promise<void> {
   log(blue.bold('Running input checks'))
-  const inputs: Inputs = checkArgsAndEnvironment()
+  const inputs: Inputs = checkArgs()
+
+  log(blue.bold('Running environment checks'))
+  checkEnvironment()
 
   log(blue.bold(`The configuration for this run is:\n ${JSON.stringify(inputs, null, 2)}`))
 
