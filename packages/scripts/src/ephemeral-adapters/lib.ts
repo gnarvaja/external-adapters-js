@@ -111,6 +111,9 @@ export const checkArgs = (): Inputs => {
     helmValuesOverride = `-f ${helmValuesOverride}`
   }
 
+  let name: string | undefined = process.env['NAME']
+  if (!name) name = ''
+
   const inputs: Inputs = {
     action,
     adapter,
@@ -121,8 +124,7 @@ export const checkArgs = (): Inputs => {
     helmValuesOverride,
     name: '',
   }
-  const name: string = generateName(inputs)
-  inputs.name = name
+  if (!name) inputs.name = generateName(inputs)
 
   return inputs
 }

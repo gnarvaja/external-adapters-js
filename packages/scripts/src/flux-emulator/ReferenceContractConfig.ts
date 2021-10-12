@@ -215,7 +215,7 @@ const addAdapterToNode = (
 /**
  * Remove the adapter from the feed configuation
  * @param {string} ephemeralAdapterName The name of the adapter to remove
- * @param {FeedConfg[]} qaConfig The FeedConfig to remove the adapter from
+ * @param {ReferenceContractConfig[]} qaConfig The FeedConfig to remove the adapter from
  * @returns {ReferenceContractConfig[]} The updated qaConfig
  */
 export const removeAdapterFromFeed = (

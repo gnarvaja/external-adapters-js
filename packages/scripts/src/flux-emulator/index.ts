@@ -1,9 +1,3 @@
-import { getResponse, setResponse } from './MockServer'
+import { main } from './lib'
 
-async function main() {
-  setResponse({
-    blarg: 'yes',
-  })
-  // await getResponse()
-}
 main()
