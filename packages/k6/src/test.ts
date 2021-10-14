@@ -1,4 +1,5 @@
 import { check, sleep } from 'k6'
+import { SharedArray } from "k6/data";
 import http from 'k6/http'
 import { Rate } from 'k6/metrics'
 import {
@@ -20,6 +21,15 @@ export const options = {
 
 let currIteration = 0
 export const errorRate = new Rate('errors')
+
+let payloadData = wsPayloads
+if (__ENV.PAYLOAD_GENERATED) {
+  payloadData = new SharedArray("payloadData", function () {
+    // here you can open files, and then do additional processing or generate the array with data dynamically
+    const f = JSON.parse(open("./config/ws.json"));
+    return f; // f must be an array[]
+  });
+}
 
 interface LoadTestGroupUrls {
   [loadTestGroup: string]: {
@@ -81,7 +91,7 @@ function buildRequests() {
   for (const [loadTestGroup, adaptersByAdapterName] of Object.entries(urls)) {
     for (const [adapterName, url] of Object.entries(adaptersByAdapterName)) {
       if (__ENV.WS_ENABLED) {
-        for (const payload of wsPayloads) {
+        for (const payload of payloadData) {
           if (adapterName === 'coinapi') {
             const body = JSON.parse(payload.data)
             body.data.endpoint = 'assets'

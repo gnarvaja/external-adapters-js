@@ -413,3 +413,5 @@ Array [
   },
 ]
 `;
+
+exports[`flux emulator config editing should remove an adapter from a feed 3`] = `Array []`;

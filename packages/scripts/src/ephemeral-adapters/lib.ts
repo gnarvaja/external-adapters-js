@@ -4,7 +4,7 @@ const { red, blue } = chalk
 const { log } = console
 
 export const ACTIONS: string[] = ['start', 'stop']
-export const HELM_CHART_DIR = 'chainlink/cl-adapter'
+export const HELM_CHART_DIR = 'chainlink/cl-adapter' //'./cl-adapter-0.1.15.tgz'
 export const IMAGE_REPOSITORY = 'public.ecr.aws/chainlink/adapters/'
 export const IMAGE_TAG = 'develop-latest'
 export const NAMESPACE = 'ephemeral-adapters'
@@ -134,12 +134,25 @@ export const checkArgs = (): Inputs => {
  * @param {Input} config The configuration of the adapter you wish to deploy
  */
 export const deployAdapter = (config: Inputs): void => {
-  const addHelmChart = new Shell().exec(
-    'helm repo add chainlink https://smartcontractkit.github.io/charts',
+  // TODO move helm repo add to the README as a one time task
+  // // add the chainlink charts repo so we can pull from it
+  // const addHelmChart = new Shell().exec(
+  //   'helm repo add chainlink https://smartcontractkit.github.io/charts',
+  // )
+  // if (addHelmChart.code !== 0) {
+  //   throw red.bold(`Failed to add the chainlink helm chart repository: ${addHelmChart.toString()}`)
+  // }
+
+  // pull the latest helm chart
+  // TODO uncomment when the helm chart repo is working
+  const pullHelmChart = new Shell().exec(
+    `helm pull ${HELM_CHART_DIR}`,
   )
-  if (addHelmChart.code !== 0) {
-    throw red.bold(`Failed to add the chainlink helm chart repository: ${addHelmChart.toString()}`)
+  if (pullHelmChart.code !== 0) {
+    throw red.bold(`Failed to pull the chainlink helm chart repository: ${pullHelmChart.toString()}`)
   }
+
+  // deploy the chart
   const deployHelm = new Shell().exec(
     `helm upgrade ${config.name} ${config.helmChartDir} \
       --install \

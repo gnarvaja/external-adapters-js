@@ -4,6 +4,7 @@ import { retryBackoff } from 'backoff-rxjs'
 import { Observable, of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import console from 'console'
+import { AxiosRequestConfig } from 'axios'
 
 export class ReferenceContractConfig {
   name: string
@@ -51,6 +52,13 @@ export class FeedNode {
   }
 }
 
+export interface K6Payload {
+  name: string
+  id: string
+  method: string
+  data: string
+}
+
 export type ReferenceContractConfigResponse = {
   configs: ReferenceContractConfig[] | undefined
 }
@@ -77,6 +85,7 @@ export const fetchConfigFromUrl = (
 
   return axios.get<ApiResponse>(configUrl, { timeout: REQUEST_TIMEOUT_MS }).pipe(
     map((res) => {
+      // console.log(res.data)
       const configs = parseConfig(res.data)
       const ret: ReferenceContractConfigResponse = {
         configs,
@@ -122,27 +131,30 @@ export const setFluxConfig = (
   configUrl: string,
 ): Observable<void> => {
   let requestAttempt = 0
-  return axios
-    .post<ApiResponse>(configUrl, JSON.stringify(config), { timeout: REQUEST_TIMEOUT_MS })
-    .pipe(
-      map(() => {
-        return
-      }),
-      catchError((err) => {
-        requestAttempt++
-        console.error(`Error setting config (${requestAttempt}/${MAX_REQUESTS}): ${err.message}`)
+  const requestConfig: AxiosRequestConfig = {
+    timeout: REQUEST_TIMEOUT_MS,
+    headers: { 'Content-Type': 'application/json' },
+  }
+  return axios.post<ApiResponse>(configUrl, config, requestConfig).pipe(
+    map(() => {
+      console.log('The posting of the new config successfully completed')
+      return
+    }),
+    catchError((err) => {
+      requestAttempt++
+      console.error(`Error setting config (${requestAttempt}/${MAX_REQUESTS}): ${err.message}`)
 
-        throw Error(err)
-      }),
-      retryBackoff(RETRY_BACKOFF),
-      catchError((err) => {
-        console.error(
-          `Could not set config. Max request limit reached (${MAX_REQUESTS}/${MAX_REQUESTS}): ${err.message}`,
-        )
+      throw Error(err)
+    }),
+    retryBackoff(RETRY_BACKOFF),
+    catchError((err) => {
+      console.error(
+        `Could not set config. Max request limit reached (${MAX_REQUESTS}/${MAX_REQUESTS}): ${err.message}`,
+      )
 
-        throw Error(err)
-      }),
-    )
+      throw Error(err)
+    }),
+  )
 }
 
 /**
@@ -245,13 +257,35 @@ export const removeAdapterFromFeed = (
     qaConfig[indexes.c].nodes.splice(indexes.n, 1)
   }
   // remove any configs with no nodes, always delete from arrays in reverse
-  for (let i = qaConfig.length - 1; i > 0; i--) {
+  for (let i = qaConfig.length - 1; i >= 0; i--) {
     if (qaConfig[i].nodes.length === 0) {
       qaConfig.splice(i, 1)
     }
   }
 
   return qaConfig
+}
+
+export const convertConfigToK6Payload = (
+  referenceConfig: ReferenceContractConfig[],
+): K6Payload[] => {
+  const payloads: K6Payload[] = []
+  for (const config of referenceConfig) {
+    const data = {
+      data: {
+        from: config.data.from,
+        quote: config.data.to,
+      },
+    }
+    const payload: K6Payload = {
+      name: config.name,
+      id: '86f45dcc-90db-4c39-b385-53945c5a9a30',
+      method: 'POST',
+      data: JSON.stringify(data),
+    }
+    payloads.push(payload)
+  }
+  return payloads
 }
 
 // export const deployFluxEmulatorConfigServer = (configUrl: string) => {

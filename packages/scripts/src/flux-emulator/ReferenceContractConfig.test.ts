@@ -133,6 +133,11 @@ describe('flux emulator config editing', () => {
     config = removeAdapterFromFeed('adapterName3', config)
     expect(config.length).toEqual(2)
     expect(config).toMatchSnapshot()
+
+    // verify removing all adapters from the feed
+    config = removeAdapterFromFeed('adapterName2', config)
+    expect(config.length).toEqual(0)
+    expect(config).toMatchSnapshot()
   })
 
   it('should succeed when it retrieves a valid configuration', async () => {
