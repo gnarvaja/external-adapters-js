@@ -84,7 +84,7 @@ export const fetchConfigFromUrl = (
   let requestAttempt = 0
 
   return axios.get<ApiResponse>(configUrl, { timeout: REQUEST_TIMEOUT_MS }).pipe(
-    map((res) => {
+    map((res: { data: Record<string, unknown>[] }) => {
       // console.log(res.data)
       const configs = parseConfig(res.data)
       const ret: ReferenceContractConfigResponse = {
@@ -92,14 +92,14 @@ export const fetchConfigFromUrl = (
       }
       return ret
     }),
-    catchError((err) => {
+    catchError((err: Error) => {
       requestAttempt++
       console.error(`Error fetching config (${requestAttempt}/${MAX_REQUESTS}): ${err.message}`)
 
-      throw Error(err)
+      throw err
     }),
     retryBackoff(RETRY_BACKOFF),
-    catchError((err) => {
+    catchError((err: Error) => {
       console.error(
         `Could not fetch config. Max request limit reached (${MAX_REQUESTS}/${MAX_REQUESTS}): ${err.message}`,
       )
@@ -140,19 +140,19 @@ export const setFluxConfig = (
       console.log('The posting of the new config successfully completed')
       return
     }),
-    catchError((err) => {
+    catchError((err: Error) => {
       requestAttempt++
       console.error(`Error setting config (${requestAttempt}/${MAX_REQUESTS}): ${err.message}`)
 
-      throw Error(err)
+      throw err
     }),
     retryBackoff(RETRY_BACKOFF),
-    catchError((err) => {
+    catchError((err: Error) => {
       console.error(
         `Could not set config. Max request limit reached (${MAX_REQUESTS}/${MAX_REQUESTS}): ${err.message}`,
       )
 
-      throw Error(err)
+      throw err
     }),
   )
 }
