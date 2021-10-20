@@ -219,6 +219,9 @@
       "path": "./sources/eodhistoricaldata"
     },
     {
+      "path": "./sources/eth-balance"
+    },
+    {
       "path": "./sources/etherchain"
     },
     {
@@ -396,10 +399,16 @@
       "path": "./sources/uniswap-v2"
     },
     {
+      "path": "./sources/uniswap-v3"
+    },
+    {
       "path": "./sources/upvest"
     },
     {
       "path": "./sources/uscpi-one"
+    },
+    {
+      "path": "./sources/view-function"
     },
     {
       "path": "./sources/wbtc-address-set"

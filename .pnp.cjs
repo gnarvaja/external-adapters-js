@@ -319,6 +319,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:packages/sources/eodhistoricaldata"
       },
       {
+        "name": "@chainlink/eth-balance-adapter",
+        "reference": "workspace:packages/sources/eth-balance"
+      },
+      {
         "name": "@chainlink/etherchain-adapter",
         "reference": "workspace:packages/sources/etherchain"
       },
@@ -555,12 +559,20 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:packages/sources/uniswap-v2"
       },
       {
+        "name": "@chainlink/uniswap-v3-adapter",
+        "reference": "workspace:packages/sources/uniswap-v3"
+      },
+      {
         "name": "@chainlink/upvest-adapter",
         "reference": "workspace:packages/sources/upvest"
       },
       {
         "name": "@chainlink/uscpi-one-adapter",
         "reference": "workspace:packages/sources/uscpi-one"
+      },
+      {
+        "name": "@chainlink/view-function-adapter",
+        "reference": "workspace:packages/sources/view-function"
       },
       {
         "name": "@chainlink/wbtc-address-set-adapter",
@@ -659,6 +671,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@chainlink/ea-test-helpers", ["workspace:packages/core/test-helpers"]],
       ["@chainlink/enzyme-adapter", ["workspace:packages/sources/enzyme"]],
       ["@chainlink/eodhistoricaldata-adapter", ["workspace:packages/sources/eodhistoricaldata"]],
+      ["@chainlink/eth-balance-adapter", ["workspace:packages/sources/eth-balance"]],
       ["@chainlink/etherchain-adapter", ["workspace:packages/sources/etherchain"]],
       ["@chainlink/etherscan-adapter", ["workspace:packages/sources/etherscan"]],
       ["@chainlink/ethgasstation-adapter", ["workspace:packages/sources/ethgasstation"]],
@@ -735,9 +748,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@chainlink/types", ["workspace:packages/core/types/@chainlink"]],
       ["@chainlink/unibit-adapter", ["workspace:packages/sources/unibit"]],
       ["@chainlink/uniswap-v2-adapter", ["workspace:packages/sources/uniswap-v2"]],
+      ["@chainlink/uniswap-v3-adapter", ["workspace:packages/sources/uniswap-v3"]],
       ["@chainlink/upvest-adapter", ["workspace:packages/sources/upvest"]],
       ["@chainlink/uscpi-one-adapter", ["workspace:packages/sources/uscpi-one"]],
       ["@chainlink/vesper-adapter", ["workspace:packages/composites/vesper"]],
+      ["@chainlink/view-function-adapter", ["workspace:packages/sources/view-function"]],
       ["@chainlink/wbtc-address-set-adapter", ["workspace:packages/sources/wbtc-address-set"]],
       ["@chainlink/wootrade-adapter", ["workspace:packages/sources/wootrade"]],
       ["@chainlink/xbto-adapter", ["workspace:packages/sources/xbto"]],
@@ -3523,6 +3538,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
             ["@types/jest", "npm:27.0.2"],
             ["@types/node", "npm:14.17.21"],
+            ["ethers", "npm:5.4.6"],
             ["nock", "npm:13.1.3"],
             ["supertest", "npm:6.1.6"],
             ["tslib", "npm:2.3.1"],
@@ -4389,6 +4405,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/dxfeed-secondary-adapter", "workspace:packages/sources/dxfeed-secondary"],
             ["@chainlink/enzyme-adapter", "workspace:packages/sources/enzyme"],
             ["@chainlink/eodhistoricaldata-adapter", "workspace:packages/sources/eodhistoricaldata"],
+            ["@chainlink/eth-balance-adapter", "workspace:packages/sources/eth-balance"],
             ["@chainlink/etherchain-adapter", "workspace:packages/sources/etherchain"],
             ["@chainlink/etherscan-adapter", "workspace:packages/sources/etherscan"],
             ["@chainlink/ethgasstation-adapter", "workspace:packages/sources/ethgasstation"],
@@ -4448,8 +4465,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/twelvedata-adapter", "workspace:packages/sources/twelvedata"],
             ["@chainlink/unibit-adapter", "workspace:packages/sources/unibit"],
             ["@chainlink/uniswap-v2-adapter", "workspace:packages/sources/uniswap-v2"],
+            ["@chainlink/uniswap-v3-adapter", "workspace:packages/sources/uniswap-v3"],
             ["@chainlink/upvest-adapter", "workspace:packages/sources/upvest"],
             ["@chainlink/uscpi-one-adapter", "workspace:packages/sources/uscpi-one"],
+            ["@chainlink/view-function-adapter", "workspace:packages/sources/view-function"],
             ["@chainlink/wbtc-address-set-adapter", "workspace:packages/sources/wbtc-address-set"],
             ["@chainlink/wootrade-adapter", "workspace:packages/sources/wootrade"],
             ["@chainlink/xbto-adapter", "workspace:packages/sources/xbto"],
@@ -4615,6 +4634,26 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
             ["@types/jest", "npm:27.0.2"],
             ["@types/node", "npm:14.17.21"],
+            ["tslib", "npm:2.3.1"],
+            ["typescript", "patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=d8b4e7"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["@chainlink/eth-balance-adapter", [
+        ["workspace:packages/sources/eth-balance", {
+          "packageLocation": "./packages/sources/eth-balance/",
+          "packageDependencies": [
+            ["@chainlink/eth-balance-adapter", "workspace:packages/sources/eth-balance"],
+            ["@chainlink/ea-bootstrap", "workspace:packages/core/bootstrap"],
+            ["@chainlink/ea-factories", "workspace:packages/core/factories"],
+            ["@chainlink/ea-test-helpers", "workspace:packages/core/test-helpers"],
+            ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
+            ["@types/jest", "npm:27.0.2"],
+            ["@types/node", "npm:14.17.21"],
+            ["ethers", "npm:5.4.6"],
+            ["nock", "npm:13.1.3"],
+            ["supertest", "npm:6.1.6"],
             ["tslib", "npm:2.3.1"],
             ["typescript", "patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=d8b4e7"]
           ],
@@ -5533,6 +5572,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/cryptoapis-adapter", "workspace:packages/sources/cryptoapis"],
             ["@chainlink/ea-bootstrap", "workspace:packages/core/bootstrap"],
             ["@chainlink/ea-test-helpers", "workspace:packages/core/test-helpers"],
+            ["@chainlink/eth-balance-adapter", "workspace:packages/sources/eth-balance"],
             ["@chainlink/gemini-adapter", "workspace:packages/sources/gemini"],
             ["@chainlink/lotus-adapter", "workspace:packages/sources/lotus"],
             ["@chainlink/reduce-adapter", "workspace:packages/sources/reduce"],
@@ -5685,7 +5725,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/ea-test-helpers", "workspace:packages/core/test-helpers"],
             ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
             ["@types/jest", "npm:27.0.2"],
+            ["@types/luxon", "npm:2.0.5"],
             ["@types/node", "npm:14.17.21"],
+            ["ethers", "npm:5.4.6"],
+            ["luxon", "npm:2.0.2"],
+            ["nock", "npm:13.1.3"],
+            ["supertest", "npm:6.1.6"],
             ["tslib", "npm:2.3.1"],
             ["typescript", "patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=d8b4e7"]
           ],
@@ -5955,6 +6000,27 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "SOFT",
         }]
       ]],
+      ["@chainlink/uniswap-v3-adapter", [
+        ["workspace:packages/sources/uniswap-v3", {
+          "packageLocation": "./packages/sources/uniswap-v3/",
+          "packageDependencies": [
+            ["@chainlink/uniswap-v3-adapter", "workspace:packages/sources/uniswap-v3"],
+            ["@chainlink/ea-bootstrap", "workspace:packages/core/bootstrap"],
+            ["@chainlink/ea-test-helpers", "workspace:packages/core/test-helpers"],
+            ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
+            ["@types/jest", "npm:26.0.24"],
+            ["@types/node", "npm:14.17.17"],
+            ["@types/supertest", "npm:2.0.11"],
+            ["decimal.js", "npm:10.3.1"],
+            ["ethers", "npm:5.4.6"],
+            ["nock", "npm:13.1.3"],
+            ["supertest", "npm:6.1.6"],
+            ["tslib", "npm:2.3.1"],
+            ["typescript", "patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=d8b4e7"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
       ["@chainlink/upvest-adapter", [
         ["workspace:packages/sources/upvest", {
           "packageLocation": "./packages/sources/upvest/",
@@ -5994,6 +6060,23 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chainlink/vesper-adapter", "workspace:packages/composites/vesper"],
             ["@chainlink/ea-bootstrap", "workspace:packages/core/bootstrap"],
             ["@chainlink/token-allocation-adapter", "workspace:packages/composites/token-allocation"],
+            ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
+            ["@types/jest", "npm:27.0.2"],
+            ["@types/node", "npm:14.17.21"],
+            ["ethers", "npm:5.4.6"],
+            ["tslib", "npm:2.3.1"],
+            ["typescript", "patch:typescript@npm%3A4.3.5#~builtin<compat/typescript>::version=4.3.5&hash=d8b4e7"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["@chainlink/view-function-adapter", [
+        ["workspace:packages/sources/view-function", {
+          "packageLocation": "./packages/sources/view-function/",
+          "packageDependencies": [
+            ["@chainlink/view-function-adapter", "workspace:packages/sources/view-function"],
+            ["@chainlink/ea-bootstrap", "workspace:packages/core/bootstrap"],
+            ["@chainlink/ea-test-helpers", "workspace:packages/core/test-helpers"],
             ["@chainlink/types", "workspace:packages/core/types/@chainlink"],
             ["@types/jest", "npm:27.0.2"],
             ["@types/node", "npm:14.17.21"],
@@ -9980,6 +10063,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-luxon-npm-1.27.1-ffe8f597c2-732405c745.zip/node_modules/@types/luxon/",
           "packageDependencies": [
             ["@types/luxon", "npm:1.27.1"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:2.0.5", {
+          "packageLocation": "./.yarn/cache/@types-luxon-npm-2.0.5-66a801b509-2d0229ade7.zip/node_modules/@types/luxon/",
+          "packageDependencies": [
+            ["@types/luxon", "npm:2.0.5"]
           ],
           "linkType": "HARD",
         }]
@@ -23430,6 +23520,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/luxon-npm-1.28.0-51c0607a71-5250cb9f13.zip/node_modules/luxon/",
           "packageDependencies": [
             ["luxon", "npm:1.28.0"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:2.0.2", {
+          "packageLocation": "./.yarn/cache/luxon-npm-2.0.2-1234b63c1d-eb2e366cf4.zip/node_modules/luxon/",
+          "packageDependencies": [
+            ["luxon", "npm:2.0.2"]
           ],
           "linkType": "HARD",
         }]
