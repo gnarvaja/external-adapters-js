@@ -134,17 +134,7 @@ export const checkArgs = (): Inputs => {
  * @param {Input} config The configuration of the adapter you wish to deploy
  */
 export const deployAdapter = (config: Inputs): void => {
-  // TODO move helm repo add to the README as a one time task
-  // // add the chainlink charts repo so we can pull from it
-  // const addHelmChart = new Shell().exec(
-  //   'helm repo add chainlink https://smartcontractkit.github.io/charts',
-  // )
-  // if (addHelmChart.code !== 0) {
-  //   throw red.bold(`Failed to add the chainlink helm chart repository: ${addHelmChart.toString()}`)
-  // }
-
   // pull the latest helm chart
-  // TODO uncomment when the helm chart repo is working
   const pullHelmChart = new Shell().exec(
     `helm pull ${HELM_CHART_DIR}`,
   )

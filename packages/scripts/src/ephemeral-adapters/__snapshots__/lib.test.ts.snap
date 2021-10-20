@@ -19,7 +19,7 @@ exports[`Ephemeral Adapters Testing starting and stopping ephemeral adapters sho
 
 exports[`Ephemeral Adapters Testing starting and stopping ephemeral adapters should throw an error if we can't deploy the helm chart 1`] = `"[31m[1mFailed to deploy the external adapter: [object Object][22m[39m"`;
 
-exports[`Ephemeral Adapters Testing starting and stopping ephemeral adapters should throw an error if we can't download the helm chart 1`] = `"[31m[1mFailed to add the chainlink helm chart repository: [object Object][22m[39m"`;
+exports[`Ephemeral Adapters Testing starting and stopping ephemeral adapters should throw an error if we can't download the helm chart 1`] = `"[31m[1mFailed to pull the chainlink helm chart repository: [object Object][22m[39m"`;
 
 exports[`Ephemeral Adapters Testing starting and stopping ephemeral adapters should throw an error if we can't remove the adapter 1`] = `"[31m[1mFailed to remove the external adapter: [object Object][22m[39m"`;
 
