@@ -266,6 +266,11 @@ export const removeAdapterFromFeed = (
   return qaConfig
 }
 
+/**
+ * Converts the flux emulator config into a k6 payload
+ * @param {ReferenceContractConfig[]} referenceConfig The configuration to convert to a k6 compatible payload
+ * @returns {K6Payload[]} The k6 compatible payload
+ */
 export const convertConfigToK6Payload = (
   referenceConfig: ReferenceContractConfig[],
 ): K6Payload[] => {

@@ -5,6 +5,8 @@ import {
   parseConfig,
   removeAdapterFromFeed,
   setFluxConfig,
+  convertConfigToK6Payload,
+  K6Payload,
 } from './ReferenceContractConfig'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
@@ -185,5 +187,10 @@ describe('flux emulator config editing', () => {
     } catch (err) {
       expect(err).toMatchSnapshot()
     }
+  })
+
+  it('should convert the config to a k6 payload', async () => {
+    const k6Payload: K6Payload[] = convertConfigToK6Payload(parseConfig(exampleFeed))
+    expect(k6Payload).toMatchSnapshot()
   })
 })
