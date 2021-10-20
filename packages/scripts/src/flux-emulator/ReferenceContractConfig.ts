@@ -292,10 +292,3 @@ export const convertConfigToK6Payload = (
   }
   return payloads
 }
-
-// export const deployFluxEmulatorConfigServer = (configUrl: string) => {
-//   // if exists do not deploy
-//   // else deploy
-//   // shelljs call blarg
-//   // verify it is healthy
-// }

@@ -1,10 +1,5 @@
 import chalk from 'chalk'
-import {
-  checkEnvironment,
-  deployAdapter,
-  generateName,
-  Inputs as AdapterInputs,
-} from '../ephemeral-adapters/lib'
+import * as ephemeralAdapters from '../ephemeral-adapters/lib'
 import {
   addAdapterToConfig,
   convertConfigToK6Payload,
@@ -22,7 +17,7 @@ import * as fs from 'fs';
 export const ACTIONS: string[] = ['start', 'stop', 'k6payload']
 export const WEIWATCHER_SERVER = 'https://weiwatchers.com/flux-emulator-mainnet.json'
 export const CONFIG_SERVER = 'https://adapters.qa.stage.cldev.sh/fluxconfig'
-export const FLUX_CONFIG_INPUTS: AdapterInputs = {
+export const FLUX_CONFIG_INPUTS: ephemeralAdapters.Inputs = {
   action: 'start',
   adapter: 'dummy-external',
   release: 'fluxconfig',
@@ -50,7 +45,7 @@ const usageString = `
 
 export const checkArgs = (): Inputs => {
   if (process.argv.length < 4) {
-    log(red.bold(usageString))
+    throw red.bold(usageString)
   }
   const action: string = process.argv[2]
   if (!ACTIONS.includes(action))
@@ -71,7 +66,7 @@ export const checkArgs = (): Inputs => {
   const configServerGet = configServer + '/json_variable'
   const configServerSet = configServer + '/set_json_variable'
 
-  const ephemeralName = generateName({
+  const ephemeralName = ephemeralAdapters.generateName({
     action: '',
     adapter,
     release,
@@ -89,16 +84,7 @@ export const checkArgs = (): Inputs => {
   }
 }
 
-const isConfigServerDeployed = (): boolean => {
-  return true
-}
-
-const deployConfigServer = () => {
-  checkEnvironment()
-  deployAdapter(FLUX_CONFIG_INPUTS)
-}
-
-const start = async (inputs: Inputs) => {
+export const start = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
   if (!masterConfig || !masterConfig.configs) {
@@ -123,7 +109,7 @@ const start = async (inputs: Inputs) => {
   await setFluxConfig(newConfig, inputs.configServerSet).toPromise()
 }
 
-const stop = async (inputs: Inputs) => {
+export const stop = async (inputs: Inputs): Promise<void> => {
   const qaConfig = await fetchConfigFromUrl(inputs.configServerGet).toPromise()
   if (!qaConfig || !qaConfig.configs) {
     throw red.bold('Could not get the qa configuration')
@@ -133,7 +119,7 @@ const stop = async (inputs: Inputs) => {
   return
 }
 
-const writeK6Payload = async (inputs: Inputs) => {
+export const writeK6Payload = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
   if (!masterConfig || !masterConfig.configs) {
@@ -164,16 +150,13 @@ export const main = async (): Promise<void> => {
   log(blue.bold('Checking the arguments'))
   const inputs: Inputs = checkArgs()
 
-  log(blue.bold('Checking the config server is deployed in this cluster'))
-  if (!isConfigServerDeployed()) {
-    deployConfigServer()
-  }
-
   log(blue.bold(`The configuration for this run is:\n ${JSON.stringify(inputs, null, 2)}`))
 
   if (inputs.action === 'start') {
     log(blue.bold('Adding configuation'))
+    console.log("TATATATATATA")
     await start(inputs)
+    console.log("TATATATATATA2")
   } else if (inputs.action === 'stop') {
     log(blue.bold('Removing configuation'))
     await stop(inputs)
