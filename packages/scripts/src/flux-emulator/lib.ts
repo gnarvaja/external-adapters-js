@@ -12,7 +12,7 @@ import {
 } from './ReferenceContractConfig'
 const { red, blue } = chalk
 const { log } = console
-import * as fs from 'fs';
+import * as fs from 'fs'
 
 export const ACTIONS: string[] = ['start', 'stop', 'k6payload']
 export const WEIWATCHER_SERVER = 'https://weiwatchers.com/flux-emulator-mainnet.json'
@@ -39,10 +39,14 @@ export interface Inputs {
 
 const usageString = `
 3 arguments are required
-1: Options are "start" or "stop". In releation to whether you want to start or stop the testing the adapter.
+1: Options are "start", "stop" or k6payload. In releation to whether you want to start or stop the testing the adapter or build a k6 payload from a flux emulator config.
 2: The adapter name you wish to tell flux emulator to test.
 3. The unique release tag for this adapter`
 
+/**
+ * Check the input arguments and return an Inputs object if all are valid
+ * @returns {Inputs} The Inputs object built from the cli and env
+ */
 export const checkArgs = (): Inputs => {
   if (process.argv.length < 4) {
     throw red.bold(usageString)
@@ -83,7 +87,10 @@ export const checkArgs = (): Inputs => {
     configServerSet,
   }
 }
-
+/**
+ * Starts the flux emulator test
+ * @param {Inputs} inputs The inputs to use to determine which adapter to test
+ */
 export const start = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
@@ -109,6 +116,10 @@ export const start = async (inputs: Inputs): Promise<void> => {
   await setFluxConfig(newConfig, inputs.configServerSet).toPromise()
 }
 
+/**
+ * Stops the flux emulator test
+ * @param {Inputs} inputs The inputs to use to determine which adapter to test
+ */
 export const stop = async (inputs: Inputs): Promise<void> => {
   const qaConfig = await fetchConfigFromUrl(inputs.configServerGet).toPromise()
   if (!qaConfig || !qaConfig.configs) {
@@ -116,9 +127,14 @@ export const stop = async (inputs: Inputs): Promise<void> => {
   }
   const newConfig = removeAdapterFromFeed(inputs.ephemeralName, qaConfig.configs)
   await setFluxConfig(newConfig, inputs.configServerSet).toPromise()
-  return
 }
 
+/**
+ * Writes a json file for k6 to use as a payload based. Pulls the config from
+ * weiwatchers to determine which adapter can hit which services and with which
+ * pairs.
+ * @param {Inputs} inputs The inputs to use to determine which adapter to create the config for
+ */
 export const writeK6Payload = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
@@ -141,9 +157,9 @@ export const writeK6Payload = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Convert config into k6 payload'))
   const payloads: K6Payload[] = convertConfigToK6Payload(newConfig)
 
-  log(blue.bold("Writing k6 payload to a file"))
+  log(blue.bold('Writing k6 payload to a file'))
   // write the payloads to a file in the k6 folder for the docker container to pick up
-  fs.writeFileSync("./packages/k6/src/config/ws.json", JSON.stringify(payloads))
+  fs.writeFileSync('./packages/k6/src/config/ws.json', JSON.stringify(payloads))
 }
 
 export const main = async (): Promise<void> => {
@@ -154,9 +170,7 @@ export const main = async (): Promise<void> => {
 
   if (inputs.action === 'start') {
     log(blue.bold('Adding configuation'))
-    console.log("TATATATATATA")
     await start(inputs)
-    console.log("TATATATATATA2")
   } else if (inputs.action === 'stop') {
     log(blue.bold('Removing configuation'))
     await stop(inputs)

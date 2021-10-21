@@ -465,6 +465,89 @@ yarn test $adapter/test/unit/my-specific-test.test.ts
 yarn test --watch $adapter/test/unit
 ```
 
+#### Soak Testing
+
+In order to soak test adapters we need to create and push the adapter out to the sdlc cluster. From there we can use the Flux Emulator or K6 to send traffic to it for the amount of time you need.
+
+Prerequisites to starting an external adapter in the sdlc cluster
+
+1. You must be on the vpn to access the k8s cluster.
+2. You must have your kubectx set to the sdlc cluster which also requires you be logged into the aws secure-sdlc account `aws sso login --profile secure-sdlc`.
+3. In order to pull the external adapter helm chart you need to have a GitHub PAT and add the chainlik helm repo using the instructions here: https://github.com/smartcontractkit/charts
+
+To spin up an adapter in the sdlc cluster:
+
+```bash
+# Build all packages
+yarn install
+yarn setup
+
+# Build the docker-compose
+# The uniqueName can be your name or something unique to you, for example in ci it will use the PR number
+# dockerImageTag should be a unique tag for this testing
+# adapterName is the adapter you want to test
+export UNIQUE_NAME=dockerImageTag
+export ADAPTER_NAME=coingecko
+export IMAGE_PREFIX=public.ecr.aws/chainlink/
+IMAGE_TAG=${UNIQUE_NAME} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
+
+# Push adapter image to private ecr
+# IMAGE_TAG=${UNIQUE_NAME} ADAPTER_NAME=${ADAPTER_NAME} yarn generate:image-name
+docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
+aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+
+# Start the adapter in the sdlc cluster
+yarn qa:adapter start ${ADAPTER_NAME} ${UNIQUE_NAME} ${UNIQUE_NAME}
+```
+
+To tear down the deployment made above after you are done testing:
+
+```bash
+yarn qa:adapter stop ${ADAPTER_NAME} ${UNIQUE_NAME} ${UNIQUE_NAME}
+```
+
+To start running a test via Flux Emulator:
+
+```bash
+# Use the same unique and adapter name from when you started the adapter
+export UNIQUE_NAME=dockerImageTag
+export ADAPTER_NAME=coingecko
+yarn qa:flux:configure start ${ADAPTER_NAME} ${UNIQUE_NAME}
+```
+
+To stop running a test via Flux Emulator:
+
+```bash
+yarn qa:flux:configure stop ${ADAPTER_NAME} ${UNIQUE_NAME}
+```
+
+To build a K6 payload file from the Flux Emulator config on WeiWatchers:
+
+```bash
+yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
+```
+
+To start a test using k6 and the generated payload
+
+```bash
+export UNIQUE_NAME=dockerImageTag
+export ADAPTER_NAME=coingecko
+# create the config
+yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
+
+# Move to the k6 package and build/push
+cd ./packages/k6
+yarn build
+yarn build:docker
+#TODO Push once we get a k6 repo created
+#TODO helm command to depoy the k6 pod
+```
+
+To stop a test using k6 in the cluster
+```bash
+# TODO command to remove the deployment
+```
+
 #### Adding Integration Test Fixtures
 
 We use `nock` for intercepting HTTP requests in integration tests and returning mock data.
@@ -480,6 +563,7 @@ The follow steps is the general pattern for writing an integration test.
 4. Now you should have a test that does not do any HTTP requests during execution.
 
 For more information, see the [Jest docs.](https://jestjs.io/docs/cli)
+
 
 #### Adding Provider API rate limits
 
