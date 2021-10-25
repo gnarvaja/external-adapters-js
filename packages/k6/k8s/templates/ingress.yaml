@@ -1,0 +1,26 @@
+{{- $name := .Values.name -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "k6.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /{{ $name }}
+            pathType: Prefix
+            backend:
+              serviceName: k6-{{ $name }}
+              servicePort: {{ $svcPort }}
+          - path: /{{ $name }}/(.*)
+            pathType: Prefix
+            backend:
+              serviceName: k6-{{ $name }}
+              servicePort: {{ $svcPort }}

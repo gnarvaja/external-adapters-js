@@ -472,7 +472,7 @@ In order to soak test adapters we need to create and push the adapter out to the
 Prerequisites to starting an external adapter in the sdlc cluster
 
 1. You must be on the vpn to access the k8s cluster.
-2. You must have your kubectx set to the sdlc cluster which also requires you be logged into the aws secure-sdlc account `aws sso login --profile secure-sdlc`.
+2. You must have your kubectx set to the sdlc cluster which also requires you be logged into the aws secure-sdlc account as a power user. To do so it would look something like this but with your specific profile name`aws sso login --profile sdlc-power`. Instructions to set this up can be found here: https://www.notion.so/chainlink/QA-Kubernetes-Cluster-ca3f1a64e6fd4476ac5a76c8bfcd8624
 3. In order to pull the external adapter helm chart you need to have a GitHub PAT and add the chainlik helm repo using the instructions here: https://github.com/smartcontractkit/charts
 
 To spin up an adapter in the sdlc cluster:
@@ -484,20 +484,26 @@ yarn setup
 
 # Build the docker-compose
 # The uniqueName can be your name or something unique to you, for example in ci it will use the PR number
-# dockerImageTag should be a unique tag for this testing
-# adapterName is the adapter you want to test
-export UNIQUE_NAME=dockerImageTag
+# Change the adapter name to the adapter you are testing
+export AWS_PROFILE=chainlink-staging
+export AWS_REGION=us-west-2
+export UNIQUE_NAME=uniqueName
 export ADAPTER_NAME=coingecko
-export IMAGE_PREFIX=public.ecr.aws/chainlink/
-IMAGE_TAG=${UNIQUE_NAME} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
+export IMAGE_PREFIX=795953128386.dkr.ecr.us-west-2.amazonaws.com/adapters/
+export IMAGE_TAG=qa-${UNIQUE_NAME}
+IMAGE_TAG=${IMAGE_TAG} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
+
+# Build the docker image
+docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
 
 # Push adapter image to private ecr
-# IMAGE_TAG=${UNIQUE_NAME} ADAPTER_NAME=${ADAPTER_NAME} yarn generate:image-name
-docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
-aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_PROFILE} | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+# If you need to create a repository for a new adapter it can be done like so:
+#aws ecr create-repository --region ${AWS_REGION} --profile ${AWS_PROFILE} --repository-name adapters/${ADAPTER_NAME} || true
+docker push ${IMAGE_PREFIX}${ADAPTER_NAME}-adapter:${IMAGE_TAG}
 
 # Start the adapter in the sdlc cluster
-yarn qa:adapter start ${ADAPTER_NAME} ${UNIQUE_NAME} ${UNIQUE_NAME}
+yarn qa:adapter start ${ADAPTER_NAME} ${UNIQUE_NAME} ${IMAGE_TAG}
 ```
 
 To tear down the deployment made above after you are done testing:
