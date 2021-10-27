@@ -36,9 +36,13 @@ jobs:
       - run: |
           # Move to the k6 package and build/push
           cd ./packages/k6
+          echo "yarn build"
           yarn build
+          echo "ecr login"
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+          echo "docker build"
           docker build -t ${IMAGE_PREFIX}:${UNIQUE_NAME} .
+          echo "docker push"
           docker push ${IMAGE_PREFIX}:${UNIQUE_NAME}
       - run: |
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
