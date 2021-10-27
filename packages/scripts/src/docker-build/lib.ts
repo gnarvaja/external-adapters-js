@@ -55,7 +55,7 @@ export interface ImageNameConfig {
   branch: string
   prefix: string
   useLatest: boolean
-  tag: string
+  tag?: string
 }
 
 export enum DockerLabels {
