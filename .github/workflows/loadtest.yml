@@ -33,14 +33,16 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_QA_ROLE_ARN }}
           role-duration-seconds: 3600
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
       - run: |
           # Move to the k6 package and build/push
           set -x
           cd ./packages/k6
           echo "yarn build"
           yarn build
-          echo "ecr login"
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+      - run: |
           echo "docker build"
           docker build -t ${IMAGE_PREFIX}:${UNIQUE_NAME} .
           echo "docker push"
