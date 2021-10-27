@@ -42,7 +42,6 @@ jobs:
           cd ./packages/k6
           echo "yarn build"
           yarn build
-      - run: |
           export UNIQUE_NAME=unique-name
           echo "docker build"
           docker build -t ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME} .
