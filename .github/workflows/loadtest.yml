@@ -31,7 +31,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_QA_ACCESSKEY }}
           aws-secret-access-key: ${{ secrets.AWS_QA_SECRETKEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_QA_ROLE_ARN }}
           role-duration-seconds: 3600
       - run: |
           # Move to the k6 package and build/push
