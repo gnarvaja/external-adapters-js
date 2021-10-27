@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: loadimpact/k6
+  repository: 795953128386.dkr.ecr.us-west-2.amazonaws.com/k6
   pullPolicy: Always
   tag: "latest"
 
@@ -23,7 +23,7 @@ securityContext:
   runAsUser: 1000
 
 service:
-  port: 80
+  port: 6565
 
 resources:
   limits:

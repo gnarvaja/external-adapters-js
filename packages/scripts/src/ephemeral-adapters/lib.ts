@@ -5,9 +5,10 @@ const { log } = console
 
 export const ACTIONS: string[] = ['start', 'stop']
 export const HELM_CHART_DIR = 'chainlink/cl-adapter' //'./cl-adapter-0.1.15.tgz'
-export const IMAGE_REPOSITORY = 'public.ecr.aws/chainlink/adapters/'
+export const IMAGE_REPOSITORY = '795953128386.dkr.ecr.us-west-2.amazonaws.com/adapters/'
 export const IMAGE_TAG = 'develop-latest'
 export const NAMESPACE = 'ephemeral-adapters'
+const CLUSTER_GREP_CHECK = "main-sdlc-cluster"
 
 export interface Inputs {
   action: string
@@ -46,7 +47,7 @@ export const checkCommandIsInstalled = (command: string): void => {
  */
 export const verifyWeAreOnSdlcCluster = (): void => {
   const response: ShellOut = new Shell().exec(
-    `kubectl config get-contexts | grep '*' | grep main-sdlc-cluster`,
+    `kubectl config get-contexts | grep '*' | grep ${CLUSTER_GREP_CHECK}`,
   )
   if (response.code !== 0)
     throw red.bold(

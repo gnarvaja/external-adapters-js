@@ -1,8 +1,7 @@
-{{- $name := .Values.name -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: k6-{{ $name }}
+  name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "k6.labels" . | nindent 4 }}

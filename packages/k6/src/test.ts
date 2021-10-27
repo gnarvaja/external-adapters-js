@@ -26,7 +26,7 @@ let payloadData = wsPayloads
 if (__ENV.PAYLOAD_GENERATED) {
   payloadData = new SharedArray("payloadData", function () {
     // here you can open files, and then do additional processing or generate the array with data dynamically
-    const f = JSON.parse(open("./config/ws.json"));
+    const f = JSON.parse(open("../src/config/ws.json"));
     return f; // f must be an array[]
   });
 }
