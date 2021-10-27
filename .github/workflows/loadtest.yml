@@ -47,7 +47,14 @@ jobs:
           docker build -t ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME} .
           echo "docker push"
           docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
+      - name: Set Kubernetes Context
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
       - run: |
+          cd ./packages/k6
+          export UNIQUE_NAME=unique-name
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
             --install \
             --namespace k6-soak \
