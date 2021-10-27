@@ -8,7 +8,7 @@ on:
 jobs:
   run-basic-checks:
     name: Run linters and unit tests
-    runs-on: [sdlc-ghr-prod]
+    # runs-on: [sdlc-ghr-prod]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -24,7 +24,7 @@ jobs:
           export IMAGE_PREFIX=${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6
           # create the config
           yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
-
+      - run: |
           # Move to the k6 package and build/push
           cd ./packages/k6
           yarn build
