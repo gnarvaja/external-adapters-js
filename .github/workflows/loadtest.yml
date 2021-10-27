@@ -21,15 +21,17 @@ jobs:
       - run: |
           export UNIQUE_NAME=unique-name
           export ADAPTER_NAME=coingecko
-          export IMAGE_PREFIX=795953128386.dkr.ecr.us-west-2.amazonaws.com/adapters/
+          export IMAGE_PREFIX=${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6
           # create the config
           yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
 
           # Move to the k6 package and build/push
           cd ./packages/k6
           yarn build
-          docker build -t 795953128386.dkr.ecr.us-west-2.amazonaws.com/k6:${UNIQUE_NAME} .
-          docker push 795953128386.dkr.ecr.us-west-2.amazonaws.com/k6:${UNIQUE_NAME}
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
+          docker build -t ${IMAGE_PREFIX}:${UNIQUE_NAME} .
+          docker push ${IMAGE_PREFIX}:${UNIQUE_NAME}
+      - run: |
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
             --install \
             --namespace k6-soak \
