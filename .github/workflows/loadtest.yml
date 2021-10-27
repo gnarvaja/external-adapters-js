@@ -1,0 +1,40 @@
+name: Actions
+
+on:
+  push:
+    branches:
+      - k6_test_qa_adapter
+
+jobs:
+  run-basic-checks:
+    name: Run linters and unit tests
+    runs-on: [sdlc-ghr-prod]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install Yarn
+        run: npm install -g yarn
+      - run: yarn install
+      - run: yarn setup
+      - run: |
+          export UNIQUE_NAME=unique-name
+          export ADAPTER_NAME=coingecko
+          export IMAGE_PREFIX=795953128386.dkr.ecr.us-west-2.amazonaws.com/adapters/
+          # create the config
+          yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
+
+          # Move to the k6 package and build/push
+          cd ./packages/k6
+          yarn build
+          docker build -t 795953128386.dkr.ecr.us-west-2.amazonaws.com/k6:${UNIQUE_NAME} .
+          docker push 795953128386.dkr.ecr.us-west-2.amazonaws.com/k6:${UNIQUE_NAME}
+          helm upgrade k6-${UNIQUE_NAME} ./k8s \
+            --install \
+            --namespace k6-soak \
+            --create-namespace \
+            -f ./k8s/values.yaml \
+            --set image.tag=${UNIQUE_NAME} \
+            --set name=k6-${UNIQUE_NAME} \
+            --wait
