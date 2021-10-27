@@ -43,10 +43,11 @@ jobs:
           echo "yarn build"
           yarn build
       - run: |
+          export UNIQUE_NAME=unique-name
           echo "docker build"
-          docker build -t ${IMAGE_PREFIX}:${UNIQUE_NAME} .
+          docker build -t ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME} .
           echo "docker push"
-          docker push ${IMAGE_PREFIX}:${UNIQUE_NAME}
+          docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
       - run: |
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
             --install \
