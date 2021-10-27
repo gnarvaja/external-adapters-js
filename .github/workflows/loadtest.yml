@@ -35,6 +35,7 @@ jobs:
           role-duration-seconds: 3600
       - run: |
           # Move to the k6 package and build/push
+          set -x
           cd ./packages/k6
           echo "yarn build"
           yarn build
