@@ -53,6 +53,7 @@ jobs:
       #     method: kubeconfig
       #     kubeconfig: ${{ secrets.KUBECONFIG }} # output output kubeconfig
         run: |
+          set -x
           mkdir ~/.aws
           echo "[default]" >> ~/.aws/credentials
           echo "aws_access_key_id=${{ secrets.AWS_QA_ACCESSKEY }}" >> ~/.aws/credentials
