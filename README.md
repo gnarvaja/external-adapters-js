@@ -485,7 +485,7 @@ yarn setup
 # Build the docker-compose
 # The uniqueName can be your name or something unique to you, for example in ci it will use the PR number
 # Change the adapter name to the adapter you are testing
-export AWS_PROFILE=sdlc-power
+export AWS_PROFILE=sdlc-k8s
 export AWS_REGION=us-west-2
 export UNIQUE_NAME=unique-name
 export ADAPTER_NAME=coingecko
@@ -497,7 +497,7 @@ IMAGE_TAG=${IMAGE_TAG} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
 docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
 
 # Push adapter image to private ecr
-aws sso login --profile sdlc-power
+aws sso login --profile ${AWS_PROFILE}
 aws ecr get-login-password --region ${AWS_REGION} --profile ${AWS_PROFILE} | docker login --username AWS --password-stdin ${IMAGE_PREFIX}
 # If you need to create a repository for a new adapter it can be done like so:
 #aws ecr create-repository --region ${AWS_REGION} --profile ${AWS_PROFILE} --repository-name adapters/${ADAPTER_NAME} || true
