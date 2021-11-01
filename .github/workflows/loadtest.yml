@@ -55,6 +55,7 @@ jobs:
         run: |
           # set -x
           aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
+          kubectl config use-context secure.ci
           cd ./packages/k6
           export UNIQUE_NAME=unique-name
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
