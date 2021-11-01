@@ -71,3 +71,4 @@ jobs:
             --set image.tag=${UNIQUE_NAME} \
             --set name=k6-${UNIQUE_NAME} \
             --wait
+
