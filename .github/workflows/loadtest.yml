@@ -48,21 +48,13 @@ jobs:
       #     echo "docker push"
       #     docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
       - name: Set Kubernetes Context
-      #   uses: azure/k8s-set-context@v1
-      #   with:
-      #     method: kubeconfig
-      #     kubeconfig: ${{ secrets.KUBECONFIG }} # output output kubeconfig
+        # uses: azure/k8s-set-context@v1
+        # with:
+        #   method: kubeconfig
+        #   kubeconfig: ${{ secrets.KUBECONFIG }} # output output kubeconfig
         run: |
-          set -x
-          mkdir ~/.aws
-          echo "[default]" >> ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.AWS_QA_ACCESSKEY }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.AWS_QA_SECRETKEY }}" >> ~/.aws/credentials
-          echo "source_profile=k6-eks-ecr-read-write"  >> ~/.aws/credentials
-          echo "role_arn=${{ secrets.AWS_QA_ROLE_ARN }}" >> ~/.aws/credentials
-          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/credentials
-          echo "output=json" >> ~/.aws/credentials
-          aws eks update-kubeconfig --name main-sdlc-cluster --profile default --alias secure.ci
+          # set -x
+          aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
           cd ./packages/k6
           export UNIQUE_NAME=unique-name
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
