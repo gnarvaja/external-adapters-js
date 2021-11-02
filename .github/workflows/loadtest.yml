@@ -56,6 +56,7 @@ jobs:
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }} # output output kubeconfig
+      - name: Deploy k6
         run: |
           # set -x
           # aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
