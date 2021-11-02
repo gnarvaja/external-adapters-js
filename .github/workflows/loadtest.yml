@@ -8,8 +8,8 @@ on:
 jobs:
   run-basic-checks:
     name: Run linters and unit tests
-    # runs-on: [sdlc-ghr-prod]
     runs-on: ubuntu-latest
+    environment: QA
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -28,10 +28,14 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_QA_ACCESSKEY }}
-          aws-secret-access-key: ${{ secrets.AWS_QA_SECRETKEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_QA_ROLE_ARN }}
+          # aws-access-key-id: ${{ secrets.AWS_QA_ACCESSKEY }}
+          # aws-secret-access-key: ${{ secrets.AWS_QA_SECRETKEY }}
+          # aws-region: ${{ secrets.AWS_REGION }}
+          # role-to-assume: ${{ secrets.AWS_QA_ROLE_ARN }}
+          aws-access-key-id: ${{ secrets.QA_SDLC_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.QA_SDLC_AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.QA_SDLC_AWS_REGION }}
+          role-to-assume: ${{ secrets.QA_SDLC_AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 3600
       - name: Login to Amazon ECR
         id: login-ecr
@@ -48,14 +52,14 @@ jobs:
       #     echo "docker push"
       #     docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
       - name: Set Kubernetes Context
-        # uses: azure/k8s-set-context@v1
-        # with:
-        #   method: kubeconfig
-        #   kubeconfig: ${{ secrets.KUBECONFIG }} # output output kubeconfig
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }} # output output kubeconfig
         run: |
           # set -x
-          aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
-          kubectl config use-context secure.ci
+          # aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
+          # kubectl config use-context secure.ci
           kubectl get ns
           cd ./packages/k6
           export UNIQUE_NAME=unique-name
