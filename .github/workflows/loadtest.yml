@@ -58,10 +58,7 @@ jobs:
           kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }} # output output kubeconfig
       - name: Deploy k6
         run: |
-          # set -x
-          # aws eks update-kubeconfig --name main-sdlc-cluster --alias secure.ci
-          # kubectl config use-context secure.ci
-          kubectl get ns
+          set -x
           cd ./packages/k6
           export UNIQUE_NAME=unique-name
           helm upgrade k6-${UNIQUE_NAME} ./k8s \
