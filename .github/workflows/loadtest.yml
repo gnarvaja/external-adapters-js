@@ -36,30 +36,38 @@ jobs:
       #     npm install -g yarn
       #     yarn install
       #     yarn setup
-      - name: Get all changed files
-        id: files
-        uses: jitterbit/get-changed-files@v1
-        with:
-          format: 'json'
-      - name: Do stuff with files
+
+      # - name: Get all changed files
+      #   id: files
+      #   uses: jitterbit/get-changed-files@v1
+      #   with:
+      #     format: 'json'
+      # - name: Do stuff with files
+      #   run: |
+      #     readarray -t modified_files <<<"$(jq -r '.[]' <<<'${{ steps.files.outputs.added_modified }}')"
+      #     for modified_files in ${modified_files[@]}; do
+      #       echo "Do something with this ${modified_files}."
+      #     done
+
+      - name: Use GH CLI to get pr info
+        env:
+          GITHUB_TOKEN: ${{ secrets.QA_GITHUB_TOKEN }}
         run: |
-          readarray -t modified_files <<<"$(jq -r '.[]' <<<'${{ steps.files.outputs.added_modified }}')"
-          for modified_files in ${modified_files[@]}; do
-            echo "Do something with this ${modified_files}."
-          done
-      - name: Get adapters list to test from changes
-        id: get-adapters-list
-        run: |
-          echo '::set-output name=DOES_THIS_TRANSFER::yes it does'
-      - name: Build the adapter
-        run: |
-          echo "did it transfer ${{ steps.get-adapters-list.outputs.DOES_THIS_TRANSFER }}"
-      - name: Push adapter image to ECR
-        run: |
-          echo "TODO"
-      - name: Deploy the adapter
-        run: |
-          echo "TODO"
+          set -x
+          gh pr view 1063 --json files --jq '.files.[].path'
+      # - name: Get adapters list to test from changes
+      #   id: get-adapters-list
+      #   run: |
+      #     echo '::set-output name=DOES_THIS_TRANSFER::yes it does'
+      # - name: Build the adapter
+      #   run: |
+      #     echo "did it transfer ${{ steps.get-adapters-list.outputs.DOES_THIS_TRANSFER }}"
+      # - name: Push adapter image to ECR
+      #   run: |
+      #     echo "TODO"
+      # - name: Deploy the adapter
+      #   run: |
+      #     echo "TODO"
       # - name: Build the k6 payload
       #   run: |
       #     export UNIQUE_NAME=unique-name
