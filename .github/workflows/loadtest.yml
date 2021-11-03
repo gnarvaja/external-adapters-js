@@ -15,16 +15,16 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '14.x'
-      # - name: Install Yarn
-      #   run: npm install -g yarn
-      # - run: yarn install
-      # - run: yarn setup
-      # - run: |
-      #     export UNIQUE_NAME=unique-name
-      #     export ADAPTER_NAME=coingecko
-      #     export IMAGE_PREFIX=${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6
-      #     # create the config
-      #     yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
+      - name: Install Yarn
+        run: npm install -g yarn
+      - run: yarn install
+      - run: yarn setup
+      - run: |
+          export UNIQUE_NAME=unique-name
+          export ADAPTER_NAME=coingecko
+          export IMAGE_PREFIX=${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6
+          # create the config
+          yarn qa:flux:configure k6payload ${ADAPTER_NAME} ${UNIQUE_NAME}
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -40,17 +40,18 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-      # - run: |
-      #     # Move to the k6 package and build/push
-      #     set -x
-      #     cd ./packages/k6
-      #     echo "yarn build"
-      #     yarn build
-      #     export UNIQUE_NAME=unique-name
-      #     echo "docker build"
-      #     docker build -t ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME} .
-      #     echo "docker push"
-      #     docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
+      - name: Push k6 image to ecr
+        run: |
+          # Move to the k6 package and build/push
+          set -x
+          cd ./packages/k6
+          echo "yarn build"
+          yarn build
+          export UNIQUE_NAME=unique-name
+          echo "docker build"
+          docker build -t ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME} .
+          echo "docker push"
+          docker push ${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/k6:${UNIQUE_NAME}
       - name: Set Kubernetes Context
         uses: azure/k8s-set-context@v1
         with:
