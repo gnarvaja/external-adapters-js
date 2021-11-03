@@ -12,22 +12,22 @@ jobs:
     environment: QA
     steps:
       - uses: actions/checkout@v2
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.QA_SDLC_AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.QA_SDLC_AWS_SECRET_KEY }}
-      #     aws-region: ${{ secrets.QA_SDLC_AWS_REGION }}
-      #     role-to-assume: ${{ secrets.QA_SDLC_AWS_ROLE_TO_ASSUME }}
-      #     role-duration-seconds: 3600
-      # - name: Login to Amazon ECR
-      #   id: login-ecr
-      #   uses: aws-actions/amazon-ecr-login@v1
-      # - name: Set Kubernetes Context
-      #   uses: azure/k8s-set-context@v1
-      #   with:
-      #     method: kubeconfig
-      #     kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.QA_SDLC_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.QA_SDLC_AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.QA_SDLC_AWS_REGION }}
+          role-to-assume: ${{ secrets.QA_SDLC_AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 3600
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Set Kubernetes Context
+        uses: azure/k8s-set-context@v1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }}
       # - uses: actions/setup-node@v2
       #   with:
       #     node-version: '14.x'
@@ -36,6 +36,17 @@ jobs:
       #     npm install -g yarn
       #     yarn install
       #     yarn setup
+      - name: Get all changed files
+        id: files
+        uses: jitterbit/get-changed-files@v1
+        with:
+          format: 'json'
+      - name: Do stuff with files
+        run: |
+          readarray -t modified_files <<<"$(jq -r '.[]' <<<'${{ steps.files.outputs.added_modified }}')"
+          for modified_files in ${modified_files[@]}; do
+            echo "Do something with this ${modified_files}."
+          done
       - name: Get adapters list to test from changes
         id: get-adapters-list
         run: |
