@@ -83,6 +83,17 @@ declare module '@chainlink/types' {
     cause: string
   }
 
+  export type AdapterErrorLog = {
+    jobRunID: string
+    params: AdapterRequestData
+    message: string
+    feedID: string
+    url?: string
+    errorResponse?: any
+    rawError?: any
+    stack?: any
+  }
+
   export type AdapterErrorResponse = {
     jobRunID: string
     status: string
@@ -114,6 +125,7 @@ declare module '@chainlink/types' {
       [T: string]: string | number
     }
     rpcUrl?: string
+    rpcPort?: number
   }
 
   export type Execute = (input: AdapterRequest, context: AdapterContext) => Promise<AdapterResponse>
