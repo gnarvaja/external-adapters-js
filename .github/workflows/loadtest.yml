@@ -62,6 +62,7 @@ jobs:
           IMAGE_TAG=${IMAGE_TAG} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
           docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
           docker push ${IMAGE_PREFIX}${ADAPTER_NAME}-adapter:${IMAGE_TAG}
+          helm repo add chainlink https://raw.githubusercontent.com/smartcontractkit/charts/gh-pages/ --password ${{ secrets.QA_GITHUB_TOKEN }}
           yarn qa:adapter start ${ADAPTER_NAME} ${UNIQUE_NAME} ${IMAGE_TAG}
       # - name: Push adapter image to ECR
       #   run: |

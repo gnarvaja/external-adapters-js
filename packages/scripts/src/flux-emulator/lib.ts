@@ -49,17 +49,26 @@ const usageString = `
  */
 export const checkArgs = (): Inputs => {
   if (process.argv.length < 4) {
+    process.exitCode = 1
     throw red.bold(usageString)
   }
   const action: string = process.argv[2]
-  if (!ACTIONS.includes(action))
+  if (!ACTIONS.includes(action)) {
+    process.exitCode = 1
     throw red.bold(`The first argument must be one of: ${ACTIONS.join(', ')}\n ${usageString}`)
+  }
 
   const adapter: string = process.argv[3]
-  if (!adapter) throw red.bold(`Missing second argument: adapter\n ${usageString}`)
+  if (!adapter) {
+    process.exitCode = 1
+    throw red.bold(`Missing second argument: adapter\n ${usageString}`)
+  }
 
   const release: string = process.argv[4]
-  if (!release) throw red.bold(`Missing third argument: release tag\n ${usageString}`)
+  if (!release) {
+    process.exitCode = 1
+    throw red.bold(`Missing third argument: release tag\n ${usageString}`)
+  }
 
   // check the environment variables
   let weiWatcherServer: string | undefined = process.env['WEIWATCHER_SERVER']
@@ -95,12 +104,14 @@ export const start = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
   if (!masterConfig || !masterConfig.configs) {
+    process.exitCode = 1
     throw red.bold('Could not get the master configuration')
   }
 
   log(blue.bold('Fetching existing qa config'))
   const qaConfig = await fetchConfigFromUrl(inputs.configServerGet).toPromise()
   if (!qaConfig || !qaConfig.configs) {
+    process.exitCode = 1
     throw red.bold('Could not get the qa configuration')
   }
 
@@ -123,6 +134,7 @@ export const start = async (inputs: Inputs): Promise<void> => {
 export const stop = async (inputs: Inputs): Promise<void> => {
   const qaConfig = await fetchConfigFromUrl(inputs.configServerGet).toPromise()
   if (!qaConfig || !qaConfig.configs) {
+    process.exitCode = 1
     throw red.bold('Could not get the qa configuration')
   }
   const newConfig = removeAdapterFromFeed(inputs.ephemeralName, qaConfig.configs)
@@ -139,6 +151,7 @@ export const writeK6Payload = async (inputs: Inputs): Promise<void> => {
   log(blue.bold('Fetching master config'))
   const masterConfig = await fetchConfigFromUrl(inputs.weiWatcherServer).toPromise()
   if (!masterConfig || !masterConfig.configs) {
+    process.exitCode = 1
     throw red.bold('Could not get the master configuration')
   }
 

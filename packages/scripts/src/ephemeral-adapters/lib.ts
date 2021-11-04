@@ -8,7 +8,7 @@ export const HELM_CHART_DIR = 'chainlink/cl-adapter' //'./cl-adapter-0.1.15.tgz'
 export const IMAGE_REPOSITORY = '795953128386.dkr.ecr.us-west-2.amazonaws.com/adapters/'
 export const IMAGE_TAG = 'develop-latest'
 export const NAMESPACE = 'ephemeral-adapters'
-const CLUSTER_GREP_CHECK = "main-sdlc-cluster"
+const CLUSTER_GREP_CHECK = 'main-sdlc-cluster'
 
 export interface Inputs {
   action: string
@@ -38,7 +38,10 @@ IMAGE_REPOSITORY - The docker image reposoitory where the image you want deploye
  */
 export const checkCommandIsInstalled = (command: string): void => {
   const c: string = new Shell().exec(`command -v ${command}`)
-  if (!c || c === '') throw red.bold(`${command} is not installed`)
+  if (!c || c === '') {
+    process.exitCode = 1
+    throw red.bold(`${command} is not installed`)
+  }
 }
 
 /**
@@ -49,10 +52,12 @@ export const verifyWeAreOnSdlcCluster = (): void => {
   const response: ShellOut = new Shell().exec(
     `kubectl config get-contexts | grep '*' | grep ${CLUSTER_GREP_CHECK}`,
   )
-  if (response.code !== 0)
+  if (response.code !== 0) {
+    process.exitCode = 1
     throw red.bold(
       `We only want to spin ephemeral environments up on the sdlc cluster. Please change your kubectx. ${response.toString()}`,
     )
+  }
 }
 
 /**
@@ -82,18 +87,27 @@ export const checkEnvironment = (): void => {
 export const checkArgs = (): Inputs => {
   // check the args
   if (process.argv.length < 5) {
+    process.exitCode = 1
     throw red.bold(usageString)
   }
   console.log(JSON.stringify(process.argv))
   const action: string = process.argv[2]
-  if (!ACTIONS.includes(action))
+  if (!ACTIONS.includes(action)) {
+    process.exitCode = 1
     throw red.bold(`The first argument must be one of: ${ACTIONS.join(', ')}`)
+  }
 
   const adapter: string = process.argv[3]
-  if (!adapter) throw red.bold('Missing second argument: adapter\n' + usageString)
+  if (!adapter) {
+    process.exitCode = 1
+    throw red.bold('Missing second argument: adapter\n' + usageString)
+  }
 
   const release: string = process.argv[4]
-  if (!release) throw red.bold('Missing third argument: release tag\n' + usageString)
+  if (!release) {
+    process.exitCode = 1
+    throw red.bold('Missing third argument: release tag\n' + usageString)
+  }
 
   let imageTag: string = process.argv[5]
   if (!imageTag) imageTag = IMAGE_TAG
@@ -136,11 +150,12 @@ export const checkArgs = (): Inputs => {
  */
 export const deployAdapter = (config: Inputs): void => {
   // pull the latest helm chart
-  const pullHelmChart = new Shell().exec(
-    `helm pull ${HELM_CHART_DIR}`,
-  )
+  const pullHelmChart = new Shell().exec(`helm pull ${HELM_CHART_DIR}`)
   if (pullHelmChart.code !== 0) {
-    throw red.bold(`Failed to pull the chainlink helm chart repository: ${pullHelmChart.toString()}`)
+    process.exitCode = 1
+    throw red.bold(
+      `Failed to pull the chainlink helm chart repository: ${pullHelmChart.toString()}`,
+    )
   }
 
   // deploy the chart
@@ -156,6 +171,7 @@ export const deployAdapter = (config: Inputs): void => {
       --wait`,
   )
   if (deployHelm.code !== 0) {
+    process.exitCode = 1
     throw red.bold(`Failed to deploy the external adapter: ${deployHelm.toString()}`)
   }
 }
@@ -171,6 +187,7 @@ export const removeAdapter = (config: Inputs): void => {
       --wait`,
   )
   if (remove.code !== 0) {
+    process.exitCode = 1
     throw red.bold(`Failed to remove the external adapter: ${remove}`)
   }
 }
