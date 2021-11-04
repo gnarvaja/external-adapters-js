@@ -28,40 +28,41 @@ jobs:
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.QA_SDLC_KUBECONFIG }}
-      # - uses: actions/setup-node@v2
-      #   with:
-      #     node-version: '14.x'
-      # - name: Install Yarn and setup project
-      #   run: |
-      #     npm install -g yarn
-      #     yarn install
-      #     yarn setup
-
-      # - name: Get all changed files
-      #   id: files
-      #   uses: jitterbit/get-changed-files@v1
-      #   with:
-      #     format: 'json'
-      # - name: Do stuff with files
-      #   run: |
-      #     readarray -t modified_files <<<"$(jq -r '.[]' <<<'${{ steps.files.outputs.added_modified }}')"
-      #     for modified_files in ${modified_files[@]}; do
-      #       echo "Do something with this ${modified_files}."
-      #     done
-
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: Install Yarn and setup project
+        run: |
+          npm install -g yarn
+          yarn install
+          yarn setup
       - name: Use GH CLI to get pr info
+        id: get-pr-info
         env:
           GITHUB_TOKEN: ${{ secrets.QA_GITHUB_TOKEN }}
         run: |
           set -x
-          gh pr view 1063 --json files --jq '.files.[].path'
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          echo '::set-output name=PR_NUMBER::1111' # TODO
+          echo "pull request number is ${pull_number}"
+          # gh pr view ${pull_number} --json files --jq '.files.[].path' # TODO
+          echo '::set-output name=ADAPTERS_LIST::coingecko'
       # - name: Get adapters list to test from changes
       #   id: get-adapters-list
       #   run: |
       #     echo '::set-output name=DOES_THIS_TRANSFER::yes it does'
-      # - name: Build the adapter
-      #   run: |
       #     echo "did it transfer ${{ steps.get-adapters-list.outputs.DOES_THIS_TRANSFER }}"
+      - name: Build the adapter
+        run: |
+          export UNIQUE_NAME=${{ steps.get-pr-info.outputs.PR_NUMBER }}
+          export ADAPTER_NAME=${{ steps.get-pr-info.outputs.ADAPTERS_LIST }}
+          export IMAGE_PREFIX=${{ secrets.SDLC_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/adapters/
+          export IMAGE_TAG=qa-${UNIQUE_NAME}
+
+          IMAGE_TAG=${IMAGE_TAG} IMAGE_PREFIX=${IMAGE_PREFIX} yarn generate:docker-compose
+          docker-compose -f docker-compose.generated.yaml build ${ADAPTER_NAME}-adapter
+          docker push ${IMAGE_PREFIX}${ADAPTER_NAME}-adapter:${IMAGE_TAG}
+          yarn qa:adapter start ${ADAPTER_NAME} ${UNIQUE_NAME} ${IMAGE_TAG}
       # - name: Push adapter image to ECR
       #   run: |
       #     echo "TODO"
